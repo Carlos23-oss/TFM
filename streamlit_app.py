@@ -11,8 +11,10 @@ Original file is located at
 #1. Librerías
 """
 
-from google.colab import drive
-drive.mount('/content/drive')
+import pandas as pd
+
+# Carga desde archivo local
+df = pd.read_csv("df_limpio.csv")
 
 import pandas as pd
 import numpy as np
