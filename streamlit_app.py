@@ -23,12 +23,12 @@ from sklearn import model_selection
 import matplotlib.pyplot as plt
 from typing import List, Sequence, Tuple
 
-!pip install -U faiss-cpu
+#pip install -U faiss-cpu
 import faiss
 
 import kagglehub
 import dask.dataframe as dd
-!pip install dask-sql --no-build-isolation
+#pip install dask-sql --no-build-isolation
 import dask.dataframe as dd
 from dask_sql import Context
 from dask.distributed import Client
@@ -80,12 +80,12 @@ from sklearn import model_selection
 import matplotlib.pyplot as plt
 from typing import List, Sequence, Tuple
 
-!pip install -U faiss-cpu
+#pip install -U faiss-cpu
 import faiss
 
 import kagglehub
 import dask.dataframe as dd
-!pip install dask-sql --no-build-isolation
+#pip install dask-sql --no-build-isolation
 import dask.dataframe as dd
 from dask_sql import Context
 from dask.distributed import Client
@@ -127,7 +127,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-!pip install streamlit
+#pip install streamlit
 
 """#2. Importación dataset de P2"""
 
@@ -430,4 +430,4 @@ if st.button("Predecir"):
     resultado = modelo_simulado([presupuesto, popularidad])
     st.success(f"Rentabilidad estimada: {resultado}")
 
-!streamlit run app.py
+#streamlit run app.py
