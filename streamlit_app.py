@@ -9,13 +9,16 @@ import os
 # Function to load artifacts
 def load_artifacts(path: str, use_gpu: bool = False) -> tuple[pd.DataFrame, np.ndarray, faiss.Index]:
     """Load the three artifacts saved in `save_artifacts`."""
-    df = pd.read_parquet(os.path.join(path, "df_rec.parquet"))
-    emb = np.load(os.path.join(path, "embeddings.npy"))
-    index = faiss.read_index(os.path.join(path, "faiss.index"))
-    if use_gpu and not isinstance(index, faiss.IndexGPU):
-        res = faiss.StandardGpuResources()
-        index = faiss.index_cpu_to_gpu(res, 0, index)
-    return df, emb, index
+    try:
+        df = pd.read_parquet(os.path.join(path, "df_rec.parquet"))
+        emb = np.load(os.path.join(path, "embeddings.npy"))
+        index = faiss.read_index(os.path.join(path, "faiss.index"))
+        if use_gpu and not isinstance(index, faiss.IndexGPU):
+            res = faiss.StandardGpuResources()
+            index = faiss.index_cpu_to_gpu(res, 0, index)
+        return df, emb, index
+    except FileNotFoundError as e:
+        raise FileNotFoundError(f"Artifact not found in {path}: {e}")
 
 # Function to recommend based on movie titles
 def recommend(
@@ -59,14 +62,15 @@ def recommend_from_text(
     model_name: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
 ) -> pd.DataFrame:
     """Return the *k* movies most similar to a free-text description."""
-    model = SentenceTransformer(model_name)
-    model.max_seq_length = 128
-
-    query_emb = model.encode([query_text], convert_to_numpy=True, normalize_embeddings=True)
-    _, idxs = index.search(query_emb.astype("float32"), k)
-    rec_indices = idxs[0].tolist()
-
-    return df.iloc[rec_indices].reset_index(drop=True)
+    try:
+        model = SentenceTransformer(model_name)
+        model.max_seq_length = 128
+        query_emb = model.encode([query_text], convert_to_numpy=True, normalize_embeddings=True)
+        _, idxs = index.search(query_emb.astype("float32"), k)
+        rec_indices = idxs[0].tolist()
+        return df.iloc[rec_indices].reset_index(drop=True)
+    except Exception as e:
+        raise RuntimeError(f"Error in text-based recommendation: {e}")
 
 # Streamlit app
 st.title("Movie Recommender System")
@@ -74,6 +78,11 @@ st.markdown("Recommend movies based on your favorite titles or a description of 
 
 # Path to artifacts (adjust if necessary)
 save_path = "recommender_artifacts"
+
+# Check if artifacts directory exists
+if not os.path.exists(save_path):
+    st.error(f"Artifacts directory '{save_path}' not found.")
+    st.stop()
 
 # Load artifacts
 with st.spinner("Loading artifacts..."):
@@ -153,5 +162,3 @@ else:
                 st.dataframe(recommendations[display_columns])
             except Exception as e:
                 st.error(f"Error generating recommendations: {e}")
-
-#streamlit run app.py
